@@ -44,9 +44,7 @@ class MyApp extends StatelessWidget {
 
           return Consumer<AuthProvider>(
             builder: (_, auth, __) {
-              return auth.user == null
-                  ? LoginScreen()
-                  : MainNavigation();
+              return auth.user == null ? LoginScreen() : MainNavigation();
             },
           );
         },
