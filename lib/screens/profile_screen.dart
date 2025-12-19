@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
@@ -14,7 +15,6 @@ class ProfileScreen extends StatelessWidget {
     final phone = user?["phone"] ?? "-";
 
     return Scaffold(
-      // ✅ IKUT THEME
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: AppBar(
@@ -26,13 +26,13 @@ class ProfileScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 20),
 
-          // ===== CARD PROFIL (TIDAK DIUBAH BENTUKNYA) =====
+          // ===== CARD PROFIL (TIDAK DIUBAH) =====
           Center(
             child: Container(
               width: 330,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.orange[200], // ❗ ini boleh tetap
+                color: Colors.orange[200],
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: const [
                   BoxShadow(
@@ -82,11 +82,10 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 25),
 
-          // ===== SWITCH DARK MODE =====
+          // ===== DARK MODE (TIDAK DIUBAH) =====
           Container(
             width: 330,
             decoration: BoxDecoration(
-              // ✅ IKUT THEME
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(14),
               boxShadow: const [
@@ -103,6 +102,62 @@ class ProfileScreen extends StatelessWidget {
               value: theme.isDark,
               onChanged: (_) {
                 context.read<ThemeProvider>().toggleTheme();
+              },
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          // ===== LOGOUT (BARU) =====
+          SizedBox(
+            width: 330,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 125, 85, 24),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: const Icon(Icons.logout, color: Colors.white),
+              label: const Text(
+                "Logout",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Logout"),
+                    content:
+                        const Text("Apakah kamu yakin ingin logout?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Batal"),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                        ),
+                        onPressed: () {
+                          context.read<AuthProvider>().logout();
+
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => LoginScreen()),
+                            (route) => false,
+                          );
+                        },
+                        child: const Text(
+                          "Logout",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           ),

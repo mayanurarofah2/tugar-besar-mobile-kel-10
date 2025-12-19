@@ -5,34 +5,36 @@ class APIConfig {
   static const String baseUrl = "http://192.168.0.18:3000";
 }
 
-
-
-
 class APIService {
-  /// REGISTER USER
-  Future<dynamic> registerUser(String name, String email, String password) async {
+  /// ===============================
+  /// REGISTER USER (AMANKAN json-server)
+  /// ===============================
+  Future<bool> registerUser(
+    String name,
+    String email,
+    String password,
+  ) async {
     final url = Uri.parse("${APIConfig.baseUrl}/users");
-
-    final body = {
-      "name": name,
-      "email": email,
-      "password": password,
-    };
 
     final res = await http.post(
       url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "name": name,
+        "email": email,
+        "password": password,
+      }),
     );
 
-    if (res.statusCode == 201) {
-      return jsonDecode(res.body);
-    } else {
-      return null;
-    }
+    // json-server sukses = 201
+    return res.statusCode == 201;
   }
 
-  /// LOGIN USER
+  /// ===============================
+  /// LOGIN USER (TETAP)
+  /// ===============================
   Future<dynamic> loginUser(String email, String password) async {
     final url = Uri.parse(
       "${APIConfig.baseUrl}/users?email=$email&password=$password",
@@ -49,7 +51,9 @@ class APIService {
     }
   }
 
-  /// GET PRODUCTS (FIXED)
+  /// ===============================
+  /// GET PRODUCTS (TETAP)
+  /// ===============================
   Future<List<dynamic>> getProducts() async {
     final url = Uri.parse("${APIConfig.baseUrl}/products");
 

@@ -36,89 +36,112 @@ class _SearchScreenState extends State<SearchScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             if (widget.onBackToHome != null) {
-              widget.onBackToHome!(); 
+              widget.onBackToHome!();
             }
           },
         ),
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.grey[200],
-              ),
-              child: TextField(
-                onChanged: (value) => setState(() => query = value),
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  hintText: "Cakes",
-                  border: InputBorder.none,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // 🔹 RESPONSIVE GRID
+          int crossAxisCount = 2;
+
+          if (constraints.maxWidth >= 1200) {
+            crossAxisCount = 5; // desktop besar
+          } else if (constraints.maxWidth >= 900) {
+            crossAxisCount = 4; // desktop
+          } else if (constraints.maxWidth >= 600) {
+            crossAxisCount = 3; // tablet
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // ===== SEARCH FIELD =====
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.grey[200],
+                  ),
+                  child: TextField(
+                    onChanged: (value) =>
+                        setState(() => query = value),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: "Cakes",
+                      border: InputBorder.none,
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: results.length,
-                itemBuilder: (context, index) {
-                  final p = results[index];
+                // ===== RESULT GRID =====
+                Expanded(
+                  child: GridView.builder(
+                    itemCount: results.length,
+                    gridDelegate:
+                        SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 15,
+                      mainAxisSpacing: 15,
+                    ),
+                    itemBuilder: (context, index) {
+                      final p = results[index];
 
-                  return GestureDetector(
-                    onTap: () {
-                      // Buka DetailScreen dan kirim data sesuai format JSON HomeScreen
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => DetailScreen(
-                            product: {
-                              "id": p.id,
-                              "name": p.name,
-                              "price": p.price,
-                              "image": p.image,
-                              "description": "Deskripsi belum tersedia",
-                            },
-                          ),
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DetailScreen(
+                                product: {
+                                  "id": p.id,
+                                  "name": p.name,
+                                  "price": p.price,
+                                  "image": p.image,
+                                  "description":
+                                      "Deskripsi belum tersedia",
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(10),
+                              child: Image.asset(
+                                "assets/${p.image}",
+                                height: 140,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              p.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text("Rp ${p.price}"),
+                          ],
                         ),
                       );
                     },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.asset(
-                            "assets/${p.image}",
-                            height: 140,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          p.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text("Rp ${p.price}"),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            )
-          ],
-        ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

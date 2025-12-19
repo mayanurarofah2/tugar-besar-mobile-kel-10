@@ -28,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
         .toList();
 
     return Scaffold(
-      // 🔹 IKUT THEME
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: AppBar(
@@ -41,116 +40,138 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => context.read<AuthProvider>().logout(),
-          )
+          ),
         ],
       ),
 
       body: prov.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ===== CATEGORY =====
-                  SizedBox(
-                    height: 40,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: categories.length,
-                      itemBuilder: (_, i) {
-                        String category = categories[i];
-                        bool selected = category == selectedCategory;
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                // 🔹 RESPONSIVE GRID
+                int crossAxisCount = 2;
 
-                        return GestureDetector(
-                          onTap: () => setState(() {
-                            selectedCategory = category;
-                          }),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15, vertical: 8),
-                            decoration: BoxDecoration(
-                              // 🔹 IKUT THEME
-                              color: selected
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .surface,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              category,
-                              style: TextStyle(
-                                // 🔹 IKUT THEME
-                                color: selected
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .onSurface,
+                if (constraints.maxWidth >= 1200) {
+                  crossAxisCount = 5; // desktop besar
+                } else if (constraints.maxWidth >= 900) {
+                  crossAxisCount = 4; // desktop
+                } else if (constraints.maxWidth >= 600) {
+                  crossAxisCount = 3; // tablet
+                }
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ===== CATEGORY =====
+                      SizedBox(
+                        height: 40,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: categories.length,
+                          itemBuilder: (_, i) {
+                            String category = categories[i];
+                            bool selected =
+                                category == selectedCategory;
+
+                            return GestureDetector(
+                              onTap: () => setState(() {
+                                selectedCategory = category;
+                              }),
+                              child: Container(
+                                margin:
+                                    const EdgeInsets.only(right: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 15,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: selected
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .surface,
+                                  borderRadius:
+                                      BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  category,
+                                  style: TextStyle(
+                                    color: selected
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // ===== PRODUCT GRID =====
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: filtered.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.78,
-                      crossAxisSpacing: 15,
-                      mainAxisSpacing: 15,
-                    ),
-                    itemBuilder: (_, i) {
-                      final p = filtered[i];
-
-                      return GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DetailScreen(product: p),
-                          ),
+                            );
+                          },
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.asset(
-                                "assets/${p["image"]}",
-                                height: 140,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              p["name"],
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // ===== PRODUCT GRID (RESPONSIVE) =====
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics:
+                            const NeverScrollableScrollPhysics(),
+                        itemCount: filtered.length,
+                        gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          childAspectRatio: 0.78,
+                          crossAxisSpacing: 15,
+                          mainAxisSpacing: 15,
                         ),
-                      );
-                    },
+                        itemBuilder: (_, i) {
+                          final p = filtered[i];
+
+                          return GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    DetailScreen(product: p),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.circular(15),
+                                  child: Image.asset(
+                                    "assets/${p["image"]}",
+                                    height: 140,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  p["name"],
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
     );
   }

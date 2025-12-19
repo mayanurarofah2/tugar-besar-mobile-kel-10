@@ -6,18 +6,20 @@ class AuthProvider extends ChangeNotifier {
   Map<String, dynamic>? user;
   bool isLoading = false;
 
-  /// REGISTER
-  Future<bool> register(String name, String email, String password) async {
-    isLoading = true;
-    notifyListeners();
+/// REGISTER (FIXED)
+Future<bool> register(String name, String email, String password) async {
+  isLoading = true;
+  notifyListeners();
 
-    final result = await APIService().registerUser(name, email, password);
+  final success =
+      await APIService().registerUser(name, email, password);
 
-    isLoading = false;
-    notifyListeners();
+  isLoading = false;
+  notifyListeners();
 
-    return result != null;
-  }
+  return success; // ✅ LANGSUNG RETURN BOOL
+}
+
 
   /// LOGIN
   Future<bool> login(String email, String password) async {
