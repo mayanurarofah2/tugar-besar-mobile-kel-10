@@ -5,6 +5,8 @@ import '../providers/auth_provider.dart';
 import 'detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key}); // ✅ TAMBAHAN const
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -16,7 +18,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ProductProvider>().fetchProducts();
+
+    // ✅ TAMBAHAN: aman dari loop
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductProvider>().fetchProducts();
+    });
   }
 
   @override
@@ -46,133 +52,123 @@ class _HomeScreenState extends State<HomeScreen> {
 
       body: prov.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : LayoutBuilder(
-              builder: (context, constraints) {
-                // 🔹 RESPONSIVE GRID
-                int crossAxisCount = 2;
+          : prov.products.isEmpty
+              // ✅ TAMBAHAN: fallback kalau kosong
+              ? const Center(child: Text("Produk belum tersedia"))
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    int crossAxisCount = 2;
 
-                if (constraints.maxWidth >= 1200) {
-                  crossAxisCount = 5; // desktop besar
-                } else if (constraints.maxWidth >= 900) {
-                  crossAxisCount = 4; // desktop
-                } else if (constraints.maxWidth >= 600) {
-                  crossAxisCount = 3; // tablet
-                }
+                    if (constraints.maxWidth >= 1200) {
+                      crossAxisCount = 5;
+                    } else if (constraints.maxWidth >= 900) {
+                      crossAxisCount = 4;
+                    } else if (constraints.maxWidth >= 600) {
+                      crossAxisCount = 3;
+                    }
 
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ===== CATEGORY =====
-                      SizedBox(
-                        height: 40,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: categories.length,
-                          itemBuilder: (_, i) {
-                            String category = categories[i];
-                            bool selected =
-                                category == selectedCategory;
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // CATEGORY
+                          SizedBox(
+                            height: 40,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: categories.length,
+                              itemBuilder: (_, i) {
+                                String category = categories[i];
+                                bool selected =
+                                    category == selectedCategory;
 
-                            return GestureDetector(
-                              onTap: () => setState(() {
-                                selectedCategory = category;
-                              }),
-                              child: Container(
-                                margin:
-                                    const EdgeInsets.only(right: 12),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 15,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: selected
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .surface,
-                                  borderRadius:
-                                      BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  category,
-                                  style: TextStyle(
-                                    color: selected
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
+                                return GestureDetector(
+                                  onTap: () => setState(() {
+                                    selectedCategory = category;
+                                  }),
+                                  child: Container(
+                                    margin:
+                                        const EdgeInsets.only(right: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 15,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: selected
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .surface,
+                                      borderRadius:
+                                          BorderRadius.circular(20),
+                                    ),
+                                    child: Text(category),
                                   ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // ===== PRODUCT GRID (RESPONSIVE) =====
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics:
-                            const NeverScrollableScrollPhysics(),
-                        itemCount: filtered.length,
-                        gridDelegate:
-                            SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          childAspectRatio: 0.78,
-                          crossAxisSpacing: 15,
-                          mainAxisSpacing: 15,
-                        ),
-                        itemBuilder: (_, i) {
-                          final p = filtered[i];
-
-                          return GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    DetailScreen(product: p),
-                              ),
+                                );
+                              },
                             ),
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(15),
-                                  child: Image.asset(
-                                    "assets/${p["image"]}",
-                                    height: 140,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  p["name"],
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics:
+                                const NeverScrollableScrollPhysics(),
+                            itemCount: filtered.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              childAspectRatio: 0.78,
+                              crossAxisSpacing: 15,
+                              mainAxisSpacing: 15,
                             ),
-                          );
-                        },
+                            itemBuilder: (_, i) {
+                              final p = filtered[i];
+
+                              return GestureDetector(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        DetailScreen(product: p),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius:
+                                          BorderRadius.circular(15),
+                                      child: Image.asset(
+                                        "assets/${p["image"]}",
+                                        height: 140,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      p["name"],
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    );
+                  },
+                ),
     );
   }
 }
