@@ -80,3 +80,6 @@ Digunakan untuk menyimpan data secara lokal di perangkat, status login user dan 
 
 -cupertino_icons (versi ^1.0.8)
 Digunakan untuk menyediakan ikon bergaya iOS pada aplikasi.
+
+maeya nur arofah
+0895322153838
