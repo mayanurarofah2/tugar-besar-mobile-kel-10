@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
+import 'checkout_screen.dart'; // ✅ TAMBAHAN (WAJIB)
 
 class CartScreen extends StatelessWidget {
   final VoidCallback onBackToHome;
@@ -22,7 +23,6 @@ class CartScreen extends StatelessWidget {
 
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // 🔹 BATAS LEBAR (DESKTOP)
           final double maxWidth =
               constraints.maxWidth >= 900 ? 700 : double.infinity;
 
@@ -40,8 +40,7 @@ class CartScreen extends StatelessWidget {
                         final item = cart.cart[index];
 
                         return ListTile(
-                          contentPadding:
-                              const EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 5,
                           ),
@@ -62,15 +61,13 @@ class CartScreen extends StatelessWidget {
                           trailing: SizedBox(
                             width: 130,
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text("Rp ${item.price}"),
                                 const SizedBox(height: 4),
 
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     GestureDetector(
                                       onTap: () =>
@@ -85,8 +82,8 @@ class CartScreen extends StatelessWidget {
 
                                     Text(
                                       "${item.qty}",
-                                      style: const TextStyle(
-                                          fontSize: 16),
+                                      style:
+                                          const TextStyle(fontSize: 16),
                                     ),
 
                                     const SizedBox(width: 8),
@@ -139,11 +136,20 @@ class CartScreen extends StatelessWidget {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () {},
+                            // ✅ TAMBAHAN SAJA DI SINI
+                          onPressed: cart.cart.isEmpty
+    ? null
+    : () {
+        Navigator.of(context, rootNavigator: true).push(
+          MaterialPageRoute(
+            builder: (_) => const CheckoutScreen(),
+          ),
+        );
+      },
+
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.orange,
-                              padding:
-                                  const EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                               shape: RoundedRectangleBorder(
                                 borderRadius:
                                     BorderRadius.circular(30),

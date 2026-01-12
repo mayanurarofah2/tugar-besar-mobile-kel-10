@@ -25,7 +25,7 @@ class CartProvider extends ChangeNotifier {
       cart.add(
         CartItem(
           name: p["name"],
-          image: p["image"],   // penting: asset bukan URL
+          image: p["image"], // penting: asset bukan URL
           price: p["price"],
         ),
       );
@@ -49,4 +49,10 @@ class CartProvider extends ChangeNotifier {
 
   int get totalPrice =>
       cart.fold(0, (sum, item) => sum + (item.qty * item.price));
+
+  // ✅ TAMBAHAN SAJA (UNTUK CHECKOUT)
+  void clearCart() {
+    cart.clear();
+    notifyListeners();
+  }
 }
